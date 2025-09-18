@@ -8,5 +8,9 @@
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "dependencies": {
+    "bull": "^4.16.5",
+    "ethers": "^6.15.0"
   }
 }

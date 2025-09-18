@@ -14,34 +14,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Network {
-  Sepolia
-  Holesky
+enum NETWORK {
+  SEPOLIA 
+  HOLESKY
 }
 
-model Transaction {
+model TransactionData {
   id           Int      @id @default(autoincrement())
-  txhash       String   @unique
   isDone       Boolean  @default(false)
+  txhash       String   @unique
+  tokenAddress String
   amount       String
   sender       String
-  nonce        Int
   network      String
-  tokenAddress String
+  nonce        Int
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
 
 model NetworkStatus {
-  id        Int      @id @default(autoincrement())
-  network   Network  @unique
-  lastBlock Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 Int      @id @default(autoincrement())
+  network            NETWORK  @unique
+  lastProcessedBlock Int
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
 model Nonce {
   id      Int     @id @default(autoincrement())
   nonce   Int     @default(0)
-  network Network @unique
+  network NETWORK @unique
 }
