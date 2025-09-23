@@ -9,6 +9,9 @@
   "peerDependencies": {
     "typescript": "^5"
   },
+  "scripts": {
+    "start": " ./index.ts"
+  },
   "dependencies": {
     "bull": "^4.16.5",
     "ethers": "^6.15.0"

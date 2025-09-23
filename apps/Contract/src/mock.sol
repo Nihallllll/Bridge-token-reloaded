@@ -10,11 +10,16 @@ contract MockToken is ERC20 {
     constructor() ERC20("Mock Token", "MTK") {
         _mint(msg.sender, 1_000_000 * 10 ** decimals());
     }
-
+    
+    function mintit(address mintAddr , uint amount) public {
+        _mint(mintAddr,amount);
+    }
     function setFailTransfers(bool _fail) external {
         failTransfers = _fail;
     }
-
+    function approveit(address spender,uint value) public {
+         approve(spender, value);
+    }
     function transfer(address to, uint256 amount) public override returns (bool) {
         if (failTransfers) revert BridgeContract__Transaction_Failed();
         return super.transfer(to, amount);

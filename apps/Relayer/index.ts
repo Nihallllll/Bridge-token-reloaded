@@ -1,13 +1,10 @@
 import { Contract, JsonRpcProvider, Wallet, Interface } from "ethers";
 import Bull from "bull";
 import dotenv from "dotenv";
-import { abi } from  "./abi";
+import { abi } from  "./abi.ts";
 import { prisma } from "db/clients";
 
 dotenv.config();
-
-
-
 const providerSEPOLIA = new JsonRpcProvider(process.env.SEPOLIA_RPC);
 const providerHOLESKY = new JsonRpcProvider(process.env.HOLESKY_RPC);
 
@@ -54,7 +51,7 @@ const listenToBridgeEvents = async (
     if (lastProcessedBlock.lastProcessedBlock >= latestBlock) {
       return;
     }
-
+    //@ts-ignore
     const filter = contract.filters.Bridge();
     const logs = await provider.getLogs({
       ...filter,
@@ -91,9 +88,9 @@ const listenToBridgeEvents = async (
 };
 
 // Set up polling listeners
-setInterval(() => listenToBridgeEvents(providerBNB, contractBNB, "SEPOLIA"), 5000);
+setInterval(() => listenToBridgeEvents(providerSEPOLIA, contractBNB, "SEPOLIA"), 5000);
 setInterval(
-  () => listenToBridgeEvents(providerAVA, contractAVA, "HOLESKY"),
+  () => listenToBridgeEvents(providerHOLESKY, contractAVA, "HOLESKY"),
   5000
 );
 
@@ -102,7 +99,7 @@ bridgeQueue.process(async (job) => {
 
   try {
     let transaction = await prisma.transactionData.findUnique({
-      where: { txHash: txhash },
+      where: { txhash: txhash },
     });
 
     if (!transaction) {
@@ -114,7 +111,7 @@ bridgeQueue.process(async (job) => {
 
       transaction = await prisma.transactionData.create({
         data: {
-          txHash: txhash,
+          txhash: txhash,
           tokenAddress,
           amount,
           sender,
@@ -131,7 +128,7 @@ bridgeQueue.process(async (job) => {
 
     await transferToken(network === "SEPOLIA", amount, sender, transaction.nonce);
     await prisma.transactionData.update({
-      where: { txHash: txhash },
+      where: { txhash: txhash },
       data: { isDone: true },
     });
 
@@ -162,8 +159,12 @@ const transferToken = async (
       ? process.env.TESTTOKEN_SEPOLIA!
       : process.env.TESTTOKEN_HOLESKY!;
 
-    const tx = await contractInstance.redeem(testToken, sender, amount, nonce);
-    await tx.wait();
+    if (typeof contractInstance.redeem === "function") {
+      const tx = await contractInstance.redeem(testToken, sender, amount, nonce);
+      await tx.wait();
+    } else {
+      throw new Error("redeem function is not defined on contractInstance");
+    }
   } catch (error) {
     throw error;
   }

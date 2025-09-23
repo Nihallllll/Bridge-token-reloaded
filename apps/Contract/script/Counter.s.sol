@@ -1,18 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {Script, console} from "forge-std/Script.sol";
-import {Counter} from "../src/Counter.sol";
+import "forge-std/Script.sol";
+import "../src/mock.sol";
 
-contract CounterScript is Script {
-    Counter public counter;
-
-    function setUp() public {}
-
-    function run() public {
+contract DeployMockToken is Script {
+    function run() external {
         vm.startBroadcast();
 
-        counter = new Counter();
+        MockToken token = new MockToken();
+        console.log("MockToken deployed at:", address(token));
 
         vm.stopBroadcast();
     }
